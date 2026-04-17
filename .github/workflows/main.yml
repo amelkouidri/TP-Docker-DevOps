@@ -7,6 +7,7 @@ on:
   pull_request:
 
 jobs:
+  # Job 1 - Tester le backend
   test-backend:
     runs-on: ubuntu-24.04
     steps:
@@ -20,3 +21,35 @@ jobs:
 
       - name: Build and test with Maven
         run: mvn clean verify -DskipTests --file ./backend/pom.xml
+
+  # Job 2 - Construire et publier les images Docker
+  build-and-push-docker-image:
+    needs: test-backend
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to DockerHub
+        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+
+      - name: Build image and push backend
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-backend:latest
+          push: ${{ github.ref == 'refs/heads/main' }}
+
+      - name: Build image and push database
+        uses: docker/build-push-action@v6
+        with:
+          context: ./database
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-database:latest
+          push: ${{ github.ref == 'refs/heads/main' }}
+
+      - name: Build image and push httpd
+        uses: docker/build-push-action@v6
+        with:
+          context: ./httpd
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-httpd:latest
+          push: ${{ github.ref == 'refs/heads/main' }}
