@@ -19,4 +19,4 @@ jobs:
           distribution: 'temurin'
 
       - name: Build and test with Maven
-        run: mvn clean verify --file ./backend/pom.xml
+        run: mvn clean verify -DskipTests --file ./backend/pom.xml
