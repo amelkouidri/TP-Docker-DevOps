@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - main
+      - develop
   pull_request:
 
 jobs:
+  # Job 1 - Tester le backend
   test-backend:
     runs-on: ubuntu-24.04
     steps:
@@ -19,14 +21,29 @@ jobs:
           distribution: 'temurin'
 
       - name: Build and test with Maven
-        run: mvn clean verify -DskipTests --file ./backend/pom.xml
+        run: mvn clean verify --file ./backend/pom.xml
+
+  # Job 2 - Analyse qualité SonarCloud
+  sonar-analysis:
+    needs: test-backend
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
 
       - name: SonarCloud Analysis
-        run: mvn -B verify sonar:sonar -DskipTests -Dsonar.projectKey=amelkouidri_TP-Docker-DevOps -Dsonar.organization=amelkouidri -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONAR_TOKEN }} --file ./backend/pom.xml
+        run: mvn -B verify sonar:sonar -Dsonar.projectKey=amelkouidri_TP-Docker-DevOps -Dsonar.organization=amelkouidri -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONAR_TOKEN }} --file ./backend/pom.xml
 
+  # Job 3 - Build et push des images Docker (main seulement)
   build-and-push-docker-image:
     needs: test-backend
     runs-on: ubuntu-24.04
+    if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -39,18 +56,18 @@ jobs:
         with:
           context: ./backend
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-backend:latest
-          push: ${{ github.ref == 'refs/heads/main' }}
+          push: true
 
       - name: Build image and push database
         uses: docker/build-push-action@v6
         with:
           context: ./database
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-database:latest
-          push: ${{ github.ref == 'refs/heads/main' }}
+          push: true
 
       - name: Build image and push httpd
         uses: docker/build-push-action@v6
         with:
           context: ./httpd
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp-devops-httpd:latest
-          push: ${{ github.ref == 'refs/heads/main' }}
+          push: true
