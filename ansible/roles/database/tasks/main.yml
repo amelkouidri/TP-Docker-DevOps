@@ -1,0 +1,16 @@
+---
+- name: Run database
+  docker_container:
+    name: database
+    image: amelkdr/tp-devops-database:latest
+    env:
+      POSTGRES_DB: "db"
+      POSTGRES_USER: "usr"
+      POSTGRES_PASSWORD: "pwd"
+    networks:
+      - name: app-network
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    purge_networks: yes
+  vars:
+    ansible_python_interpreter: /opt/docker_venv/bin/python
