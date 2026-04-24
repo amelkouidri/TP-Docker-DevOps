@@ -7,6 +7,8 @@ LoadModule proxy_module modules/mod_proxy.so\n\
 LoadModule proxy_http_module modules/mod_proxy_http.so\n\
 <VirtualHost *:80>\n\
     ProxyPreserveHost On\n\
+    ProxyPass /departments http://backend:8080/departments\n\
+    ProxyPassReverse /departments http://backend:8080/departments\n\
     ProxyPass /api/ http://backend:8080/\n\
     ProxyPassReverse /api/ http://backend:8080/\n\
     ProxyPass / http://frontend:80/\n\

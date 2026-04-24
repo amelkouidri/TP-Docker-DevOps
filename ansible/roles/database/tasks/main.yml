@@ -9,7 +9,6 @@
       POSTGRES_PASSWORD: "pwd"
     networks:
       - name: app-network
-    volumes:
-      - db-data:/var/lib/postgresql/data
+    
   vars:
     ansible_python_interpreter: /opt/docker_venv/bin/python
