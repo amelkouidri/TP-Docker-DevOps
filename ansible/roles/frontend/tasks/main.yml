@@ -3,8 +3,6 @@
   docker_container:
     name: frontend
     image: amelkdr/tp-devops-frontend:latest
-    ports:
-      - "8080:80"
     networks:
       - name: app-network
   vars:
