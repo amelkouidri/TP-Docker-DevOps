@@ -7,6 +7,5 @@
       - "80:80"
     networks:
       - name: app-network
-    purge_networks: yes
   vars:
     ansible_python_interpreter: /opt/docker_venv/bin/python
